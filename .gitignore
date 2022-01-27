@@ -1,0 +1,7 @@
+/.env
+/wordle_buddy.egg-info/
+/dist/
+/build/
+/.pytest_cache/
+/venv/
+/test/.pytest_cache/
