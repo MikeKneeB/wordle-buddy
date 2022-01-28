@@ -93,7 +93,8 @@ class WordleCommandHandler:
         if additional is None:
             additional = []
         days = datetime.datetime.today().weekday()
-        results = self._database.load(guild,
+        results = self._database.load(guild.id,
                                       weeks=range(utils.current_day() - days, utils.current_day()))
+        print(results)
         ldb = await _ldb_from_results(guild, results)
-        return self.Response.MSG_CHANNEL, _ldb_message(ldb)
+        return self.Response.MSG_CHANNEL, _ldb_message(days, ldb)

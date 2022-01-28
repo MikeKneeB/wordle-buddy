@@ -148,6 +148,7 @@ async def test_leaderboard(additional, raw_results, processed_results, message):
             patch('wordle_buddy.commands._ldb_message') as mock_ldb_message, \
             patch('wordle_buddy.commands._ldb_from_results') as mock_ldb_results:
         guild_inst = MockGuild.return_value
+        guild_inst.id = 99
         mock_db = MockDB.return_value
         mock_current_day.return_value = 321
         mock_dt.datetime.today.return_value = datetime.datetime(day=27, month=1, year=2021)
@@ -156,9 +157,9 @@ async def test_leaderboard(additional, raw_results, processed_results, message):
         mock_ldb_message.return_value = message
         handler = wc.WordleCommandHandler(mock_db)
         assert await handler._leaderboard(guild_inst, additional) == (handler.Response.MSG_CHANNEL, message)
-        mock_db.load.assert_called_once_with(guild_inst, weeks=range(319, 321))
+        mock_db.load.assert_called_once_with(99, weeks=range(319, 321))
         mock_ldb_results.assert_called_once_with(guild_inst, raw_results)
-        mock_ldb_message.assert_called_once_with(processed_results)
+        mock_ldb_message.assert_called_once_with(2, processed_results)
 
 
 normal_ldb_results = {1029: [{'score': 7}], 1028: [{'score': 4}], 1027: [{'score': 5}]}
@@ -180,7 +181,6 @@ none_expected_output = {'1029': 7}
 async def test_ldb_from_results(test_results, expected_output):
     with patch.object(discord.Guild, 'fetch_member') as mock_fetch_member:
         mock_guild = discord.Guild
-
         class DummyMem:
             def __init__(self, name):
                 self.display_name = name
