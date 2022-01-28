@@ -5,3 +5,4 @@
 /.pytest_cache/
 /venv/
 /test/.pytest_cache/
+/src/wordle_buddy.egg-info/

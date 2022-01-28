@@ -1,6 +1,5 @@
 import re
-from core import wutils
-
+from wordle_buddy import utils
 
 WORDLE_HEADER_RE = re.compile(r'Wordle (\d+) ([123456X])/6[*]?')
 
@@ -16,7 +15,7 @@ def get_matrix(result_lines):
     for line in result_lines:
         line = line.strip()
         if len(line) == 5:
-            this_line = list(map(lambda x: wutils.EMOJI_TO_RESULT[x], line.strip()))
+            this_line = list(map(lambda x: utils.EMOJI_TO_RESULT[x], line.strip()))
             matrix.append(this_line)
         else:
             raise MessageException('Wrong number of characters in results line')
@@ -27,16 +26,16 @@ def process_header(header):
     header_match = WORDLE_HEADER_RE.match(header.strip())
     if header_match:
         if header_match.group(2) == 'X':
-            return int(header_match.group(1)), wutils.FAILURE_SCORE
+            return int(header_match.group(1)), utils.FAILURE_SCORE
         else:
             return int(header_match.group(1)), int(header_match.group(2))
     raise MessageException('No header for message')
 
 
 def validate(result):
-    if wutils.current_day() != result['week_number']:
+    if utils.current_day() != result['week_number']:
         raise MessageException('Bad week number (don\'t be late)!')
-    if result['score'] != wutils.FAILURE_SCORE:
+    if result['score'] != utils.FAILURE_SCORE:
         if len(result['matrix']) != result['score']:
             raise MessageException('Score and matrix length were different')
         if sum(result['matrix'][-1]) != 10:

@@ -1,7 +1,7 @@
 import json
 import os
 
-from core.wutils import *
+from wordle_buddy.utils import *
 
 
 class JsonWordleDB:

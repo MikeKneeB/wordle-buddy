@@ -1,15 +1,15 @@
 import pytest
 
-from core import wutils, wmessage as wm
+from wordle_buddy import message as wm, utils
 
 from contextlib import nullcontext as does_not_raise
 from unittest.mock import patch
 
 
-test_lines = [f'{wutils.WHITE_SQUARE_CHAR}{wutils.GREEN_SQUARE_CHAR}{wutils.BLACK_SQUARE_CHAR}{wutils.YELLOW_SQUARE_CHAR}{wutils.WHITE_SQUARE_CHAR}']
-too_many_lines = [f'{wutils.WHITE_SQUARE_CHAR}{wutils.GREEN_SQUARE_CHAR}{wutils.BLACK_SQUARE_CHAR}{wutils.YELLOW_SQUARE_CHAR}{wutils.WHITE_SQUARE_CHAR}{wutils.WHITE_SQUARE_CHAR}']
-too_few_lines = [f'{wutils.WHITE_SQUARE_CHAR}{wutils.GREEN_SQUARE_CHAR}{wutils.BLACK_SQUARE_CHAR}{wutils.YELLOW_SQUARE_CHAR}']
-bad_char_lines = [f'{wutils.WHITE_SQUARE_CHAR}{wutils.GREEN_SQUARE_CHAR}{wutils.BLACK_SQUARE_CHAR}U{wutils.YELLOW_SQUARE_CHAR}']
+test_lines = [f'{utils.WHITE_SQUARE_CHAR}{utils.GREEN_SQUARE_CHAR}{utils.BLACK_SQUARE_CHAR}{utils.YELLOW_SQUARE_CHAR}{utils.WHITE_SQUARE_CHAR}']
+too_many_lines = [f'{utils.WHITE_SQUARE_CHAR}{utils.GREEN_SQUARE_CHAR}{utils.BLACK_SQUARE_CHAR}{utils.YELLOW_SQUARE_CHAR}{utils.WHITE_SQUARE_CHAR}{utils.WHITE_SQUARE_CHAR}']
+too_few_lines = [f'{utils.WHITE_SQUARE_CHAR}{utils.GREEN_SQUARE_CHAR}{utils.BLACK_SQUARE_CHAR}{utils.YELLOW_SQUARE_CHAR}']
+bad_char_lines = [f'{utils.WHITE_SQUARE_CHAR}{utils.GREEN_SQUARE_CHAR}{utils.BLACK_SQUARE_CHAR}U{utils.YELLOW_SQUARE_CHAR}']
 test_exp = [[0, 2, 0, 1, 0]]
 
 
@@ -121,7 +121,7 @@ result_bad_fail = {
     ]
 )
 def test_validate(test_input, expectation):
-    with patch('core.wutils.current_day') as mock_current_day:
+    with patch('wordle_buddy.utils.current_day') as mock_current_day:
         mock_current_day.return_value = 321
         with expectation:
             wm.validate(test_input)
@@ -189,7 +189,8 @@ bad_matrix_inputs = (
     ]
 )
 def test_handle(test_input, test_output, db_called_with):
-    with patch('core.wutils.current_day') as mock_current_day, patch('core.json_db.JsonWordleDB') as MockDB:
+    with patch('wordle_buddy.utils.current_day') as mock_current_day,\
+            patch('wordle_buddy.json_db.JsonWordleDB') as MockDB:
         mock_current_day.return_value = 321
         db_inst = MockDB.return_value
         db_inst.save.return_value = test_output

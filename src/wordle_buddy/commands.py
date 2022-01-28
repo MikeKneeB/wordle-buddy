@@ -1,7 +1,6 @@
 import datetime
 from enum import Enum
-from core import wutils
-
+from wordle_buddy import utils
 
 HELP_TEXT = '''
 *Hello it's me, the Wordle Buddy!*
@@ -58,7 +57,7 @@ def _total_score(user_results):
         if result:
             score += result['score']
         else:
-            score += wutils.FAILURE_SCORE
+            score += utils.FAILURE_SCORE
     return score
 
 
@@ -96,6 +95,6 @@ class WordleCommandHandler:
             additional = []
         days = datetime.datetime.today().weekday()
         results = self._database.load(guild,
-                                      weeks=range(wutils.current_day() - days, wutils.current_day()))
+                                      weeks=range(utils.current_day() - days, utils.current_day()))
         ldb = _ldb_from_results(guild, days, results)
         return self.Response.MSG_CHANNEL, _ldb_message(days, ldb)

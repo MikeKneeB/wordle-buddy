@@ -1,7 +1,7 @@
 import datetime
 
 import pytest
-from core import wcommands as wc
+from wordle_buddy import commands as wc
 
 from unittest.mock import patch
 

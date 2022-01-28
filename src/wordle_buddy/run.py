@@ -4,13 +4,13 @@
 import os
 
 from dotenv import load_dotenv
-from core.json_db import JsonWordleDB
-from core.wconnect import WordleClient
-from core.wmessage import WordleMessageManager
-from core.wcommands import WordleCommandHandler
+from wordle_buddy.json_db import JsonWordleDB
+from wordle_buddy.connect import WordleClient
+from wordle_buddy.message import WordleMessageManager
+from wordle_buddy.commands import WordleCommandHandler
 
 
-if __name__ == '__main__':
+def run_buddy():
     load_dotenv()
     token = os.getenv('DISCORD_TOKEN')
     watch_channel = os.getenv('WATCH_CHANNEL')
@@ -22,3 +22,7 @@ if __name__ == '__main__':
     client = WordleClient(watch_channel, manager, commands)
 
     client.run(token)
+
+
+if __name__ == '__main__':
+    run_buddy()
