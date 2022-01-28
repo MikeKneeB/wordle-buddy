@@ -1,7 +1,7 @@
 import json
 import os
 
-from wordle_buddy.utils import *
+from wordle_buddy import utils
 
 
 class JsonWordleDB:
@@ -20,7 +20,7 @@ class JsonWordleDB:
         if not names:
             names = self._get_all_names(guild)
         if not weeks:
-            weeks = [current_day()]
+            weeks = [utils.current_day()]
         result = {}
         for name in names:
             result[name] = []

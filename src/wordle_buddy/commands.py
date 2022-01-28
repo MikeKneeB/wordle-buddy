@@ -27,13 +27,12 @@ Results are accepted if they are directly copied and pasted from wordle. You can
 '''
 
 
-async def _ldb_from_results(guild, days, results):
+async def _ldb_from_results(guild, results):
     ldb = {}
     for k, v in results.items():
-        print(v)
         member = await guild.fetch_member(k)
         if member:
-            ldb[member.display_name] = _total_score(days, v)
+            ldb[member.display_name] = _total_score(v)
     sort_ldb = dict(sorted(ldb.items(), key=lambda pair: pair[1]))
     return sort_ldb
 
@@ -96,5 +95,5 @@ class WordleCommandHandler:
         days = datetime.datetime.today().weekday()
         results = self._database.load(guild,
                                       weeks=range(utils.current_day() - days, utils.current_day()))
-        ldb = _ldb_from_results(guild, days, results)
-        return self.Response.MSG_CHANNEL, _ldb_message(days, ldb)
+        ldb = await _ldb_from_results(guild, results)
+        return self.Response.MSG_CHANNEL, _ldb_message(ldb)
