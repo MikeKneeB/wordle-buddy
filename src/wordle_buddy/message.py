@@ -32,8 +32,8 @@ def process_header(header):
     raise MessageException('No header for message')
 
 
-def validate(result):
-    if utils.current_day() != result['week_number']:
+def validate(result, date):
+    if utils.that_day(date) != result['week_number']:
         raise MessageException('Bad week number (don\'t be late)!')
     if result['score'] != utils.FAILURE_SCORE:
         if len(result['matrix']) != result['score']:
@@ -51,7 +51,7 @@ class WordleMessageManager:
     def __init__(self, db):
         self._database = db
 
-    def handle(self, guild, name, message):
+    def handle(self, guild, name, message, date):
         lines = message.split('\n')
         if len(lines) > self.HEADER_LINES:
             try:
@@ -61,7 +61,7 @@ class WordleMessageManager:
                     'score': score,
                     'matrix': get_matrix([line for line in lines[self.HEADER_LINES:] if line.strip()])
                 }
-                validate(result)
+                validate(result, date)
                 self._database.save(guild, name, result)
                 return True
             except MessageException as me:

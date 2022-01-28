@@ -27,3 +27,10 @@ EMOJI_TO_RESULT = {
 
 def current_day():
     return (date.today() - DAY_ONE).days
+
+
+def that_day(that_date):
+    try:
+        return (that_date - DAY_ONE).days
+    except TypeError:
+        return (that_date.date() - DAY_ONE).days

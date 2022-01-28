@@ -23,10 +23,20 @@ class WordleClient(discord.Client):
 
         response_type, response = await self._command_handler.handle_command(message.guild, message)
         if response_type == self._command_handler.Response.NONE:
-            ok = self._message_manager.handle(message.guild.id, message.author.id, message.content)
+            ok = self._message_manager.handle(message.guild.id, message.author.id, message.content, message.created_at)
             if ok:
                 await message.add_reaction(check)
+        elif response_type == self._command_handler.Response.SCRAPE:
+            await self.scrape(message.channel)
         elif response_type == self._command_handler.Response.MSG_CHANNEL:
             await message.channel.send(response)
         elif response_type == self._command_handler.Response.MSG_PRIVATE:
             await message.author.send(response)
+
+    async def scrape(self, channel):
+        async for message in channel.history(limit = 500):
+            if check not in [str(r) for r in message.reactions]:
+                ok = self._message_manager.handle(message.guild.id, message.author.id, message.content,
+                                                  message.created_at)
+                if ok:
+                    await message.add_reaction(check)

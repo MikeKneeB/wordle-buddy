@@ -64,11 +64,13 @@ class WordleCommandHandler:
     COMMAND_PREFIX = '+w'
     COMMAND_HELP = 'help'
     COMMAND_LEADERBOARD = 'leaderboard'
+    COMMAND_SCRAPE = 'scrape'
 
     class Response(Enum):
         NONE = 0
         MSG_PRIVATE = 1
         MSG_CHANNEL = 2
+        SCRAPE = 3
 
     def __init__(self, db):
         self._database = db
@@ -83,6 +85,8 @@ class WordleCommandHandler:
             elif command_list[0] == self.COMMAND_LEADERBOARD:
                 command_list.pop(0)
                 return await self._leaderboard(guild, command_list)
+            elif command_list[0] == self.COMMAND_SCRAPE:
+                return self.Response.SCRAPE, None
         except KeyError:
             return self.Response.NONE, None
 
@@ -93,6 +97,8 @@ class WordleCommandHandler:
         if additional is None:
             additional = []
         days = datetime.datetime.today().weekday()
+        if days:
+            days = 7
         results = self._database.load(guild.id,
                                       weeks=range(utils.current_day() - days, utils.current_day()))
         print(results)
