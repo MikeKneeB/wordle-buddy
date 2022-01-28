@@ -94,11 +94,15 @@ class WordleCommandHandler:
         return self.Response.MSG_PRIVATE, HELP_TEXT
 
     async def _leaderboard(self, guild, additional=None):
-        if additional is None:
-            additional = []
-        days = datetime.datetime.today().weekday()
-        if days:
-            days = 7
+        if additional is None or len(additional) == 0:
+            additional = ['week']
+        if len(additional) > 0:
+            if additional[0] == 'week':
+                days = datetime.datetime.today().isoweekday()
+            elif additional[0] == 'month':
+                days = datetime.datetime.today().day
+            else:
+                days = int(additional[0])
         results = self._database.load(guild.id,
                                       weeks=range(utils.current_day() - days, utils.current_day()))
         print(results)
