@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 
+import logging
 import os
 
 from dotenv import load_dotenv
@@ -17,6 +18,8 @@ def run_buddy():
     watch_channel = emojize(os.getenv('WATCH_CHANNEL'))
     print(watch_channel)
     results_directory = os.getenv('RESULTS_DIRECTORY')
+    log_file = os.getenv('LOG_FILE')
+    logging.basicConfig(filename=log_file, level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s')
 
     db = JsonWordleDB(results_directory)
     manager = WordleMessageManager(db)

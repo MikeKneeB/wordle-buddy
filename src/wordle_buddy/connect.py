@@ -34,7 +34,7 @@ class WordleClient(discord.Client):
             await message.author.send(response)
 
     async def scrape(self, channel):
-        async for message in channel.history(limit = 500):
+        async for message in channel.history(limit=500):
             if check not in [str(r) for r in message.reactions]:
                 ok = self._message_manager.handle(message.guild.id, message.author.id, message.content,
                                                   message.created_at)

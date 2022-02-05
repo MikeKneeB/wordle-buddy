@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 from wordle_buddy import utils
@@ -26,6 +27,8 @@ class JsonWordleDB:
             result[name] = []
             for week in weeks:
                 result[name] += [self._load_one(guild, name, week)]
+            if all(item is None for item in result[name]):
+                result.pop(name)
         return result
 
     def _load_one(self, guild, name, week):
@@ -34,10 +37,12 @@ class JsonWordleDB:
                       'r') as result_file:
                 return json.load(result_file)
         except FileNotFoundError:
+            logging.warning(f'Couldn\'t find result for week {week}, name {name} and guild {guild} in database')
             return None
 
     def _get_all_names(self, guild):
         try:
             return [int(i) for i in os.listdir(os.path.join(self._root_dir, str(guild)))]
         except FileNotFoundError:
+            logging.warning(f'No guild {guild} found in database')
             return []

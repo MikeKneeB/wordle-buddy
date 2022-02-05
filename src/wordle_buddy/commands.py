@@ -37,6 +37,16 @@ async def _ldb_from_results(guild, results):
     return sort_ldb
 
 
+async def _ave_ldb_from_results(guild, results):
+    ldb = {}
+    for k, v in results.items():
+        member = await guild.fetch_member(k)
+        if member:
+            ldb[member.display_name] = _ave_score(v)
+    sort_ldb = dict(sorted(ldb.items(), key=lambda pair: pair[1][0]))
+    return sort_ldb
+
+
 def _ldb_message(days, ldb):
     start = datetime.datetime.today() - datetime.timedelta(days=days)
     end = datetime.datetime.today() - datetime.timedelta(days=1)
@@ -46,6 +56,19 @@ POS NAME           SCORE
 -------------------------------------------'''
     for num, entry in enumerate(ldb.items(), start=1):
         ldb_str += f'\n{num:<4}{entry[0]:<15}{entry[1]}'
+    ldb_str += '```'
+    return ldb_str
+
+
+def _ave_ldb_message(days, ldb):
+    start = datetime.datetime.today() - datetime.timedelta(days=days)
+    end = datetime.datetime.today() - datetime.timedelta(days=1)
+    ldb_str = f'''```Wordle Average Leaderboard: {start:%d/%m/%Y} - {end:%d/%m/%Y}
+===========================================
+POS NAME           SCORE  TOTAL GAMES
+-------------------------------------------'''
+    for num, entry in enumerate(ldb.items(), start=1):
+        ldb_str += f'\n{num:<4}{entry[0]:<15}{entry[1][0]:<7.3f}{entry[1][1]}'
     ldb_str += '```'
     return ldb_str
 
@@ -60,11 +83,25 @@ def _total_score(user_results):
     return score
 
 
+def _ave_score(user_results):
+    score = 0
+    num_scores = 0
+    for result in user_results:
+        if result:
+            score += result['score']
+            num_scores += 1
+    try:
+        return score / num_scores, num_scores
+    except ZeroDivisionError:
+        return 0, 0
+
+
 class WordleCommandHandler:
     COMMAND_PREFIX = '+w'
     COMMAND_HELP = 'help'
     COMMAND_LEADERBOARD = 'leaderboard'
     COMMAND_SCRAPE = 'scrape'
+    COMMAND_AVERAGE_LDB = 'average'
 
     class Response(Enum):
         NONE = 0
@@ -87,6 +124,9 @@ class WordleCommandHandler:
                 return await self._leaderboard(guild, command_list)
             elif command_list[0] == self.COMMAND_SCRAPE:
                 return self.Response.SCRAPE, None
+            elif command_list[0] == self.COMMAND_AVERAGE_LDB:
+                command_list.pop(0)
+                return await self._average_ldb(guild, command_list)
         except KeyError:
             return self.Response.NONE, None
 
@@ -96,15 +136,35 @@ class WordleCommandHandler:
     async def _leaderboard(self, guild, additional=None):
         if additional is None or len(additional) == 0:
             additional = ['week']
-        if len(additional) > 0:
-            if additional[0] == 'week':
-                days = datetime.datetime.today().isoweekday()
-            elif additional[0] == 'month':
-                days = datetime.datetime.today().day
-            else:
+        if additional[0] == 'week':
+            days = datetime.datetime.today().isoweekday()
+        elif additional[0] == 'month':
+            days = datetime.datetime.today().day
+        else:
+            try:
                 days = int(additional[0])
+            except ValueError:
+                return self.Response.NONE, None
         results = self._database.load(guild.id,
                                       weeks=range(utils.current_day() - days, utils.current_day()))
-        print(results)
         ldb = await _ldb_from_results(guild, results)
         return self.Response.MSG_CHANNEL, _ldb_message(days, ldb)
+
+    async def _average_ldb(self, guild, additional=None):
+        if additional is None or len(additional) == 0:
+            additional = ['all']
+        if additional[0] == 'week':
+            days = datetime.datetime.today().isoweekday()
+        elif additional[0] == 'month':
+            days = datetime.datetime.today().day
+        elif additional[0] == 'all':
+            days = utils.current_day()
+        else:
+            try:
+                days = int(additional[0])
+            except ValueError:
+                return self.Response.NONE, None
+        results = self._database.load(guild.id,
+                                      weeks=range(utils.current_day() - days, utils.current_day()))
+        ldb = await _ave_ldb_from_results(guild, results)
+        return self.Response.MSG_CHANNEL, _ave_ldb_message(days, ldb)

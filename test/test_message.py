@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 from wordle_buddy import message as wm, utils
@@ -49,9 +51,12 @@ bad_score_end_input = 'Wordle 321 4/7'
         pytest.param(failed_input, failed_output, does_not_raise(), id="Failure header processed"),
         pytest.param(bad_text_input, None, pytest.raises(wm.MessageException), id="Bad text raises exception"),
         pytest.param(bad_week_input, None, pytest.raises(wm.MessageException), id="Bad week number raises exception"),
-        pytest.param(bad_score_low_input, None, pytest.raises(wm.MessageException), id="Score too low raises exception"),
-        pytest.param(bad_score_high_input, None, pytest.raises(wm.MessageException), id="Score too high raises exception"),
-        pytest.param(bad_score_end_input, None, pytest.raises(wm.MessageException), id="Incorrect 'out of' raises exception"),
+        pytest.param(bad_score_low_input, None, pytest.raises(wm.MessageException),
+                     id="Score too low raises exception"),
+        pytest.param(bad_score_high_input, None, pytest.raises(wm.MessageException),
+                     id="Score too high raises exception"),
+        pytest.param(bad_score_end_input, None, pytest.raises(wm.MessageException),
+                     id="Incorrect 'out of' raises exception"),
     ]
 )
 def test_process_header(test_input, test_output, expectation):
@@ -121,10 +126,11 @@ result_bad_fail = {
     ]
 )
 def test_validate(test_input, expectation):
-    with patch('wordle_buddy.utils.current_day') as mock_current_day:
-        mock_current_day.return_value = 321
+    with patch('wordle_buddy.utils.that_day') as mock_that_day:
+        mock_that_day.return_value = 321
+        date = datetime.datetime(year=2021, month=1, day=1)
         with expectation:
-            wm.validate(test_input)
+            wm.validate(test_input, date)
 
 
 good_inputs = (
@@ -135,7 +141,8 @@ good_inputs = (
 \u2b1c\u2b1c\u2b1c\u2b1c\u2b1c
 \u2b1c\U0001f7e8\u2b1c\U0001f7e9\u2b1c
 \U0001f7e9\U0001f7e9\U0001f7e9\U0001f7e9\U0001f7e9
-'''
+''',
+    datetime.datetime(year=2021, month=1, day=1)
 )
 good_result = (
     1337,
@@ -153,7 +160,8 @@ no_body_inputs = (
     1337,
     10101,
     f'''Wordle 321 3/6
-'''
+''',
+    datetime.datetime(year=2021, month=1, day=1)
 )
 
 bad_header_inputs = (
@@ -164,7 +172,8 @@ bad_header_inputs = (
 \u2b1c\u2b1c\u2b1c\u2b1c\u2b1c
 \u2b1c\U0001f7e8\u2b1c\U0001f7e9\u2b1c
 \U0001f7e9\U0001f7e9\U0001f7e9\U0001f7e9\U0001f7e9
-'''
+''',
+    datetime.datetime(year=2021, month=1, day=1)
 )
 
 bad_matrix_inputs = (
@@ -175,7 +184,8 @@ bad_matrix_inputs = (
 \u2b1c\u2b1c\u2b1c\u2b1c\u2b1c
 \u2b1c\U0001f7e8\u2b1c\U0001f7e9\u2b1c
 \U0001f7e9\U0001f7e91\U0001f7e9\U0001f7e9
-'''
+''',
+    datetime.datetime(year=2021, month=1, day=1)
 )
 
 
@@ -189,9 +199,10 @@ bad_matrix_inputs = (
     ]
 )
 def test_handle(test_input, test_output, db_called_with):
-    with patch('wordle_buddy.utils.current_day') as mock_current_day,\
+    with patch('wordle_buddy.utils.that_day') as mock_that_day,\
             patch('wordle_buddy.json_db.JsonWordleDB') as MockDB:
-        mock_current_day.return_value = 321
+        mock_that_day.return_value = 321
+
         db_inst = MockDB.return_value
         db_inst.save.return_value = test_output
         man = wm.WordleMessageManager(db_inst)
