@@ -123,6 +123,8 @@ result_bad_fail = {
                      id="Matrix doesn't end in a success but score does raises exception"),
         pytest.param(result_bad_score, pytest.raises(wm.MessageException),
                      id="Score doesn't match matrix raises exception"),
+        pytest.param(result_bad_score, pytest.raises(wm.MessageException),
+                     id="Score doesn't match matrix raises exception"),
     ]
 )
 def test_validate(test_input, expectation):
@@ -131,6 +133,21 @@ def test_validate(test_input, expectation):
         date = datetime.datetime(year=2021, month=1, day=1)
         with expectation:
             wm.validate(test_input, date)
+
+
+result_ok_bst = {
+    'week_number': 285,
+    'score': 3,
+    'matrix': [[0, 0, 0, 0, 0],
+               [0, 1, 0, 2, 0],
+               [2, 2, 2, 2, 2]]
+}
+
+
+def test_validate_bst():
+    date = datetime.datetime(year=2022, month=3, day=30, hour=23, minute=30)
+    with does_not_raise():
+        wm.validate(result_ok_bst, date)
 
 
 good_inputs = (
