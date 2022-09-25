@@ -18,10 +18,14 @@ def get_matrix(result_lines):
     for line in result_lines:
         line = line.strip()
         if len(line) == 5:
-            this_line = list(map(lambda x: utils.EMOJI_TO_RESULT[x], line.strip()))
+            this_line = list(
+                map(lambda x: utils.EMOJI_TO_RESULT[x], line.strip())
+            )
             matrix.append(this_line)
         else:
-            raise MessageException('Wrong number of characters in results line')
+            raise MessageException(
+                'Wrong number of characters in results line'
+            )
     return matrix
 
 
@@ -50,7 +54,9 @@ def validate(result, date):
         if sum(result['matrix'][-1]) != 10:
             raise MessageException('Result didn\'t end in a success')
     elif sum(result['matrix'][-1]) == 10:
-        raise MessageException('Result did end in a success, but was reported as a failure')
+        raise MessageException(
+            'Result did end in a success, but was reported as a failure'
+        )
 
 
 class WordleMessageManager:
@@ -60,7 +66,7 @@ class WordleMessageManager:
     def __init__(self, db):
         self._database = db
 
-    def handle(self, guild, name, message, date):
+    def handle(self, guild, name, message, date, display_name=''):
         lines = message.split('\n')
         if len(lines) > self.HEADER_LINES:
             try:
@@ -68,13 +74,18 @@ class WordleMessageManager:
                 result = {
                     'week_number': week_number,
                     'score': score,
-                    'matrix': get_matrix([line for line in lines[self.HEADER_LINES:] if line.strip()])
+                    'matrix': get_matrix(
+                        [
+                            line for line in lines[self.HEADER_LINES:]
+                            if line.strip()
+                        ]
+                    )
                 }
                 validate(result, date)
-                self._database.save(guild, name, result)
+                self._database.save(guild, name, result, display_name)
                 return True
             except MessageException as me:
                 print(f'Message exception: {me.reason}')
             except KeyError:
-                print(f'Key error: bad character in result matrix')
+                print('Key error: bad character in result matrix')
         return False

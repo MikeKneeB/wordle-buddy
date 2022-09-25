@@ -1,29 +1,38 @@
 import discord
 
 
-check = '\U00002705'
+check = "\U00002705"
 
 
 class WordleClient(discord.Client):
-
     def __init__(self, watch_channel, message_manager, command_handler):
-        discord.Client.__init__(self)
+        discord.Client.__init__(
+            self, intents=discord.Intents.all()
+        )
         self._watch_channel = watch_channel
         self._message_manager = message_manager
         self._command_handler = command_handler
 
     async def on_ready(self):
-        print(f'{self.user} has connected to discord!')
+        print(f"{self.user} has connected to discord!")
 
     async def on_message(self, message):
         if message.author == self.user:
             return
-        if message.channel.name != self._watch_channel:
+        if self._watch_channel not in message.channel.name:
             return
 
-        response_type, response = await self._command_handler.handle_command(message.guild, message)
+        response_type, response = await self._command_handler.handle_command(
+            message.guild, message
+        )
         if response_type == self._command_handler.Response.NONE:
-            ok = self._message_manager.handle(message.guild.id, message.author.id, message.content, message.created_at)
+            ok = self._message_manager.handle(
+                message.guild.id,
+                message.author.id,
+                message.content,
+                message.created_at,
+                message.author.name,
+            )
             if ok:
                 await message.add_reaction(check)
         elif response_type == self._command_handler.Response.SCRAPE:
@@ -36,7 +45,11 @@ class WordleClient(discord.Client):
     async def scrape(self, channel):
         async for message in channel.history(limit=500):
             if check not in [str(r) for r in message.reactions]:
-                ok = self._message_manager.handle(message.guild.id, message.author.id, message.content,
-                                                  message.created_at)
+                ok = self._message_manager.handle(
+                    message.guild.id,
+                    message.author.id,
+                    message.content,
+                    message.created_at,
+                )
                 if ok:
                     await message.add_reaction(check)
